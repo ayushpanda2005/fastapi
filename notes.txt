@@ -1,0 +1,75 @@
+1) API - MEANS OF COMMS BETWEEN 2 SW COMPONENTS EX - DB AND BACKEND AND HANDLES REQ RESP CYCLES 
+BETWEEN THEM FOLLOWING PROTOCOLS
+
+2) BE AND FE DONT NEED API IF THEYRE UNDER SAME SRC FILE IN A VERY TIGHTLY COUPLED CALLED
+MONOLITHIC ARCHITECTURE . NOW FOR MOBILE PC AND ANDROID WE DONT DEVELOP 3 MONOLITHICS USING
+3 DEV TEAMS BUT (3 FE + API) -> BE -> DB 
+
+3) USED FOR GIVING INFO ACCESS FROM DB VIA PROVIDING BACKEND ACCESS VIA API TO CALL FETCHDATA .
+BUT CANTS SO DUE TO SECURITY RISK AS BE IS ONLY A COMPONENT IN A MONOLITHIC MODEL .
+
+4) FE AND AGENTS BOTH USE API NOW . API RETURNS JSON RESP . FOLLOW HTTP .
+
+5) SAVE ML DL MODEL IN A BIN FILE THAT CAN INTERACT WITH BE .
+
+6)FASTAPI - HIGH PERFORMANCE WEB FRAMEWORK FOR BUILDING APIS WITH PY .
+- BUILT ON STARLETTE(HANDLES HTTP REQ-RESP) + PYDANTIC(data+type validation)
+-FAST TO CODE AND LOW LATENCY
+-ITS SGI IS ASYNC AND HANDLES CONCURRANT REQ UNLIKE FLASKS SYNC 
+-WORKFLOW= API REQ WITH FEATURE VALS + SGI(TO TRANSLATE TO PY READABLE) + API(HITS ML AND GIVES 
+PREDICTION)
+-PARALLEL PROCESSING USING ASYNC AWAIT . IE WHILE MODEL IS PREDICTING , WE CAN HANDLE COMING REQ
+-IP VAL + INTERACTIVE DOCS + DOCKER/KBRNETES/OAUTH READY
+
+7) RUN USING MYENV/SCRIPTS/ACTIVATE THEN uvicorn main:app --reload to start server . 8000/docs to examine endpoints 
+and req headers . neednt use postman
+
+8)STATIC WEBSITE - ONE WAY COMMS , GET | DYNAMIC - 2WAY CRUD . WEBSITE RUNS ON server
+CREATE RETRIEVE UPDATE DELETE
+
+9) 
+def load_data():
+    with open('patients.json','r') as f:
+       data = json.load(f)
+
+    return data
+@app.get('/view')
+def view():
+    data=load_data() 
+
+    return data
+
+10) path params 
+@app.get('/patient/{pid}):
+def view_patient(pid: str):
+    data=load_data()
+
+    if pid in data:
+       return[pid] 
+    return {'error':'patient not found\n'}
+
+can do def view_patient(pid: str=Path(...,description='',example='')): can use to show in docs
+
+11)HTTPException returns custom HTTP error msgs
+raise HTTPException(status_code=404,detail='patient not founf\n')
+
+12)query params /patients/city=Delhi&sort_by=age optional btw 
+@app.get('/sort')  // ie /sort?sort_by='ascending'
+@app.get('/sort')
+def sort_patients(sort_by: str = Query(..., description='Sort on the basis of height, weight or bmi'), order: str = Query('asc', description='sort in asc or desc order')):
+
+    valid_fields = ['height', 'weight', 'bmi']
+
+    if sort_by not in valid_fields:
+        raise HTTPException(status_code=400, detail=f'Invalid field select from {valid_fields}')
+    
+    if order not in ['asc', 'desc']:
+        raise HTTPException(status_code=400, detail='Invalid order select between asc and desc')
+    
+    data = load_data()
+
+    sort_order = True if order=='desc' else False
+
+    sorted_data = sorted(data.values(), key=lambda x: x.get(sort_by, 0), reverse=sort_order)
+
+    return sorted_data
