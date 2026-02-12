@@ -33,6 +33,11 @@ def load_data():
        data = json.load(f)
 
     return data
+def save_data(data):
+    with open('patients.json', 'w') as f:
+        json.dump(data, f)
+
+return JSONResponese(.....)
 @app.get('/view')
 def view():
     data=load_data() 
@@ -73,3 +78,5 @@ def sort_patients(sort_by: str = Query(..., description='Sort on the basis of he
     sorted_data = sorted(data.values(), key=lambda x: x.get(sort_by, 0), reverse=sort_order)
 
     return sorted_data
+
+14) see put code
